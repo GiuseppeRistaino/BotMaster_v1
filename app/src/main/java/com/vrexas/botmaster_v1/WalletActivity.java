@@ -38,28 +38,39 @@ public class WalletActivity extends AppCompatActivity {
 
         appState.wallet.addCoinsReceivedEventListener(new WalletCoinsReceivedEventListener() {
             @Override
-            public void onCoinsReceived(Wallet w, Transaction tx, Coin prevBalance, Coin newBalance) {
-                Coin value = tx.getValueSentToMe(w);
+            public void onCoinsReceived(Wallet w, final Transaction tx, Coin prevBalance, Coin newBalance) {
+                final Coin value = tx.getValueSentToMe(w);
                 //System.out.println("Received tx for " + value.toFriendlyString() + ": " + tx);
-                Log.d("App", "Received tx for " + value.toFriendlyString() + ": " + tx);
-                Toast.makeText(WalletActivity.this, "Received tx for " + value.toFriendlyString() + ": " + tx, Toast.LENGTH_SHORT).show();
+                runOnUiThread(new Runnable() {
+                    public void run() {
+                        Toast.makeText(WalletActivity.this, "Received tx for " + value.toFriendlyString() + ": " + tx, Toast.LENGTH_SHORT).show();
+                        Log.d("App", "Received tx for " + value.toFriendlyString() + ": " + tx);
+                    }
+                });
 
-                //Da cambiare!!!!!!!!!!!!!!!!!!!! In Android non funziona....
                 Futures.addCallback(tx.getConfidence().getDepthFuture(1), new FutureCallback<TransactionConfidence>() {
                     @Override
                     public void onSuccess(TransactionConfidence result) {
-                        //System.out.println("Transazione ricevuta con successo");
-                        //System.out.println("Il Master ha: " +w.getBalance().toFriendlyString());
-                        Log.d("App", "Transazione ricevuta con successo");
-                        appState.saveWallet();
-                        textviewWallet.setText(appState.wallet.toString());
-                    }
 
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                Toast.makeText(WalletActivity.this, "Received tx for " + value.toFriendlyString() + ": " + tx, Toast.LENGTH_SHORT).show();
+                                Log.d("App", "Transazione ricevuta con successo");
+                                appState.saveWallet();
+                                textviewWallet.setText(appState.wallet.toString());
+                            }
+                        });
+                    }
                     @Override
                     public void onFailure(Throwable t) {
-                        // This kind of future can't fail, just rethrow in case something weird happens.
                         //System.out.println("Transazione non ricevuta");
                         Log.d("App", "Transazione non ricevuta");
+                        runOnUiThread(new Runnable() {
+                            public void run() {
+                                Toast.makeText(WalletActivity.this, "Transazione non ricevuta", Toast.LENGTH_SHORT).show();
+                                Log.d("App", "Transazione non ricevuta");
+                            }
+                        });
                     }
                 });
             }
